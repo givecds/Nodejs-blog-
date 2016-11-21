@@ -1,4 +1,5 @@
 <%- include head %>
+
 	<form action="ucenter" method="post">
 		<p>
 			<span>name:</span>
@@ -12,5 +13,11 @@
 		</p>
 		<p><input type="submit" value="submit"></p>
 	</form>
+	<% if (success) { %>
+	<div><%= success %> </div>
+	<% } %>
+	<% if (error) { %>
+	<div><%= error %> </div>
+	<% } %>
   </body>
 </html>

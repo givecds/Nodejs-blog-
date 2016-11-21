@@ -1,15 +1,22 @@
 <%- include head %>
-	<form action="ucenter" method="post">
-		<p>
-			<span>name:</span>
+	<h1>欢迎您登陆， <%=user%></h1>
+	<form  method="post" action="post">
+		<div>
+			<span>上传图像:</span>
 			<br>
-			<input id="name" name="name" type="text">
-		</p>
-		<p>
-			<span>password:</span>
+			<!-- <input id="imgupload" name="imgupload" type="file"> -->
+		</div>
+		<div>
+			<a style="font-weight: 500;font-size:14px;line-height: 24px;" href="/">再发表一篇:</a>
 			<br>
-			<input id="password" name="password" type="password">
-		</p>
+			<span style="font-weight: 700;font-size:22px;line-height: 24px;">
+			<%=postTitle%>
+			</span>
+			<br>
+			<div style="font-weight: 500;font-size:16px;line-height: 22px;">
+			<%=postText%>
+			</div>
+		</div>
 		<p><input type="submit" value="submit"></p>
 	</form>
   </body>

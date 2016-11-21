@@ -1,11 +1,23 @@
-<!DOCTYPE html>
-<html>
-  <head>
-	<title>my ucenter</title>
-	<link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-	<h1>Hello World</h1>
-	<p>你已经成功登陆</p>
+<%- include head %>
+	<h1>欢迎您登陆， <%=user%></h1>
+	<form  method="post" action="post">
+		<div>
+			<span>上传图像:</span>
+			<br>
+			<!-- <input id="imgupload" name="imgupload" type="file"> -->
+		</div>
+		<div>
+			<span style="font-weight: 700;font-size:16px;line-height: 24px;">发表文章:</span>
+			<br>
+			<span style="font-weight: 700;font-size:14px;line-height: 24px;">标题:</span>
+			<br>
+			<input id="name" name="title" type="text">
+			<br>
+			<span style="font-weight: 700;font-size:14px;line-height: 24px;">正文:</span>
+			<br>
+			<textarea rows="30" cols="100" id="textpost" name="textpost"></textarea>
+		</div>
+		<p><input type="submit" value="submit"></p>
+	</form>
   </body>
 </html>

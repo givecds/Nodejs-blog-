@@ -1,37 +1,104 @@
 var express = require('express');
 var router = express.Router();
 var user = require('../db/db').user;
+var posts = require('../db/post').posts;
+var crypto = require('crypto');
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/blogdb');
+var db = mongoose.connection;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'index' });
+    res.render('index', { 
+	  	title: '首页',
+	  	user: req.session.user,
+		success: req.flash('success').toString(),
+		error: req.flash('error').toString()  
+	});
 });
 
+function checkLogin(req,res,next){
+	if(!req.session.user){
+		req.flash("error","还未登录");
+		res.redirect('/login');
+	}
+	next();
+};
+
+function checkNotLogin(req,res,next){
+	if(req.session.user){
+		req.flash("error","已登录");
+		res.redirect('back');
+	}
+	next();
+};
+
+router.post('/login',checkNotLogin);
+router.post('/login', function(req, res) {
+  	res.render('login', { 
+  		title: 'login' ,
+  		error: req.flash('error').toString(),
+  		user: req.session.user,
+		success: req.flash('success').toString()
+  	});
+});
+
+router.get('/login',checkNotLogin);
 router.get('/login', function(req, res) {
-  res.render('login', { title: 'login' });
+  	res.render('login', { 
+  		title: 'login' ,
+  		error: req.flash('error').toString(),
+  		user: req.session.user,
+		success: req.flash('success').toString()
+  	});
 });
 
+router.get('/logout',checkLogin);
+router.get('/logout',function(req,res){
+	req.session.user = null;
+	req.flash("success","成功退出登录");
+	res.redirect('/login');
+});
+
+router.get('/ucenter',checkLogin);
 router.get('/ucenter',function(req,res){
-	res.redirect('/');
+	res.render('ucenter', { 
+		title: '会员中心',
+		user: req.session.user,
+		success: req.flash('success').toString(),
+		error: req.flash('error').toString() 
+	});
+	res.redirect('/ucenter');
 });
 
+
+router.post('/ucenter',checkNotLogin);
 router.post('/ucenter',function(req,res){
 	var query = {name: req.body.name,password: req.body.password};
 	user.findOne(query,function(err,doc){
 		if(doc) {
 			console.log(doc);
-			res.render('ucenter',{title: '已登录'});
+			req.session.user = query;
+			res.render('ucenter',{user: req.body.name,title:'会员中心'});
 		}else{
-			console.log(err+"登录失败"+new Date());
+			req.flash("error","用户名不存在或者密码错误");
 			res.redirect('/login')
 			}
 	})
 });
 
+
+router.get('/reg',checkNotLogin);
 router.get('/reg',function(req,res){
-	res.render('reg', { title: 'regist' });
+	res.render('reg', { 
+		title: '注册',
+		user: req.session.user,
+		success: req.flash('success').toString(),
+		error: req.flash('error').toString() 
+	});
 });
 
+router.post('/reg',checkNotLogin);
 router.post('/reg',function(req,res){
 	var query = {name: req.body.name,password: req.body.password};
 	if(query.password !== req.body.password_rep){
@@ -42,29 +109,55 @@ router.post('/reg',function(req,res){
 			console.log("docs"+docs);
 			if(docs) {
 				console.log(query.name+"已注册");
+				req.flash("error","已注册")
 				res.redirect('/reg');
 			}else{
 				console.log(query+"注册没问题");
+				req.flash("success","注册没问题")
 				newUser=new user(query);
+				req.session.user=newUser;
 				newUser.save(function(err,docs){
 					console.log(err||docs);
 					});
 				res.redirect('/login');
 			}
 		});
-		
-	
-		// (function(){
-		// 	newUser.save(newUser,{safe:true},function(err,doc){
-		// 		if(err){console.log("insertError"+err)};
-		// 		console.log(doc);
-		// 		res.redirect('/');
-		// 	});
-		// })(newUser);
-	
-		
 	}
 });
 
+router.get('/post',checkNotLogin);
+router.get('/post',function(req,res){
+	res.redirect('/ucenter');
+});
+
+router.post('/post',checkLogin);
+router.post('/post',function(req,res){
+	var date = new Date();
+	var time={
+		date: date,
+		year: date.getFullYear(),
+		month: date.getFullYear()+'-'+(date.getMonth()+1),
+		day: date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate(),
+		minute: date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+(date.getMinutes()<10?'0'+date.getMinutes():date.getMinutes())
+	}
+	var query = {
+		name: req.session.user.name,
+		time: time,
+		title: req.body.title,
+		post: req.body.textpost
+	}
+	var newPost= new posts(query);
+	newPost.save(function(err,docs){
+		console.log(err||docs);
+	});
+	res.render('post',{
+		title: 'post' ,
+  		error: req.flash('error').toString(),
+  		user: query.name,
+		success: req.flash('success').toString(),
+		postTitle: query.title,
+		postText: query.post
+	})
+})
 
 module.exports = router;
