@@ -6,12 +6,13 @@ var crypto = require('crypto');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/blogdb');
 var db = mongoose.connection;
+var markdown = require('markdown').markdown;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
     res.render('index', { 
 	  	title: '首页',
-	  	user: req.session.user,
+	  	user: req.session.user.name,
 		success: req.flash('success').toString(),
 		error: req.flash('error').toString()  
 	});
@@ -38,7 +39,7 @@ router.post('/login', function(req, res) {
   	res.render('login', { 
   		title: 'login' ,
   		error: req.flash('error').toString(),
-  		user: req.session.user,
+  		user: req.session.user.name,
 		success: req.flash('success').toString()
   	});
 });
@@ -48,7 +49,7 @@ router.get('/login', function(req, res) {
   	res.render('login', { 
   		title: 'login' ,
   		error: req.flash('error').toString(),
-  		user: req.session.user,
+  		user: req.session.user.name,
 		success: req.flash('success').toString()
   	});
 });
@@ -64,11 +65,10 @@ router.get('/ucenter',checkLogin);
 router.get('/ucenter',function(req,res){
 	res.render('ucenter', { 
 		title: '会员中心',
-		user: req.session.user,
+		user: req.session.user.name,
 		success: req.flash('success').toString(),
 		error: req.flash('error').toString() 
 	});
-	res.redirect('/ucenter');
 });
 
 
@@ -92,7 +92,7 @@ router.get('/reg',checkNotLogin);
 router.get('/reg',function(req,res){
 	res.render('reg', { 
 		title: '注册',
-		user: req.session.user,
+		user: req.session.user.name,
 		success: req.flash('success').toString(),
 		error: req.flash('error').toString() 
 	});
@@ -144,7 +144,7 @@ router.post('/post',function(req,res){
 		name: req.session.user.name,
 		time: time,
 		title: req.body.title,
-		post: req.body.textpost
+		post: markdown.toHTML(req.body.textpost)
 	}
 	var newPost= new posts(query);
 	newPost.save(function(err,docs){
